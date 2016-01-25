@@ -16,7 +16,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import net.sf.jcgm.core.MarkerColour;
 import sjtu.wr.utils.DbUtil;
+import sjtu.wr.utils.FileNameOp;
 import sjtu.wr.utils.OperateXMLByDOM;
 
 public class TaskManager {
@@ -27,19 +29,59 @@ public class TaskManager {
 	
 	
 	private static final String sqlDropTableTemplate = "DROP TABLE IF EXISTS t_?;";
-	private static final String sqlInsertProject ="insert into t_projectlist values(null,?,?,?,?,?);";
 	
 	private DbUtil dbCon = null;
+	private String dbName = null;
+	private String srcDir = null;
 	
 	void operateTask(String input, String output, String name){
 		
 		boolean result;
 		
-		result = addDDNFileMap(input, output, name);
-		if (!result) return;
+		dbCon = new DbUtil();
+		Connection con = null;
+		try {
+			con = dbCon.getCon();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		result = addDDNFileMap(con, input, output, name);
+		
+		if (!result){
+			try {
+				dbCon.closeCon(con);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return;
+		}
+		
+		result = indexDM(con);
+		
+
 	}
 	
+	File[] getPMFiles()	{
+		return null;
+	}
 	
+	boolean indexDM(Connection con){
+		
+		File[] pms = getPMFiles();
+		for (File pm: pms){
+			
+		}
+		
+		return true;
+	}
+	
+	void insertCodeFilePair(PreparedStatement pstmt, String code, String file) throws SQLException{
+	
+		pstmt.setString(1, code);
+		pstmt.setString(2, file);
+		pstmt.executeUpdate();
+	}
 	
 	File[] findMatchedFile(File[] files, String regexp, boolean isSingle)
 	{
@@ -74,7 +116,7 @@ public class TaskManager {
 		return findMatchedFile(files, regexp, isSingle);
 	}
 	
-	boolean addDDNFileMap(String input, String output, String name)
+	boolean addDDNFileMap(Connection con, String input, String output, String name)
 	{
 		File[] ddns = findMatchedFile(input, ddnReg, true);
 		
@@ -87,7 +129,8 @@ public class TaskManager {
 		
 		System.out.println("找到DDN目录： " + ddns[0]);
 		
-		String dbName = "db_" + name;
+		srcDir = FileNameOp.makeDirName(input);
+		dbName = "db_" + name;
 		File ddn = ddns[0];
 		
 		long time = ddn.lastModified();
@@ -98,39 +141,56 @@ public class TaskManager {
 		date = new Date();
 		String updateTime = simpleFormat.format(date);
 		
-
-		dbCon = new DbUtil();
-		Connection con = null;
-		try {
-			con = dbCon.getCon();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
 		// 添加记录到publisher当中，并添加新的数据库
 		PreparedStatement pstmt = null;
 		Statement stmt = null;
 		try {
-			pstmt = con.prepareStatement(sqlInsertProject);
+			pstmt = con.prepareStatement("insert into t_projectlist "
+					+ "values(null,?,?,?,?,?,?);");
+			
 			pstmt.setString(1, name);
 			pstmt.setString(2, dbName);
 			pstmt.setString(3, updateTime);
 			pstmt.setString(4, ddnTime);
-			pstmt.setString(5, ddn.getAbsolutePath());
+			pstmt.setString(5, srcDir);
+			pstmt.setString(6, ddn.getName());
 			pstmt.executeUpdate();
+			pstmt.close();
 			
 			stmt = con.createStatement();
 			DbUtil.createDBAndSwitch(stmt, dbName);
 			
+			stmt.executeUpdate("CREATE TABLE t_filecodemap"
+					+ "(`id` INT NOT NULL AUTO_INCREMENT,"
+					+ "`code` VARCHAR(45) NOT NULL,"
+					+ "`file` VARCHAR(90) NULL, "
+					+ "PRIMARY KEY (`id`), UNIQUE INDEX "
+					+ "`idnew_table_UNIQUE` (`id` ASC));");
+			
+			stmt.executeUpdate("CREATE TABLE `t_dmrecord` ("+
+				  "`id` int(11) NOT NULL AUTO_INCREMENT,"+
+				  "`dmc` varchar(128) DEFAULT NULL,"+
+				  "`name` varchar(128) DEFAULT NULL," + 
+				  "`modified` datetime DEFAULT NULL,"+
+				  "`content` text,"+
+				  "`html` text,"+
+				  "`security` int(11) DEFAULT NULL,"+
+				  "`language` varchar(10) DEFAULT NULL,"+
+				  "`associateFile` varchar(256) NOT NULL,"+
+				  "PRIMARY KEY (`id`),"+
+				  "UNIQUE KEY `id_UNIQUE` (`id`),"+
+				  "UNIQUE KEY `dmc_UNIQUE` (`dmc`)"+
+				  ") ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+			
 		} catch (SQLException e1) {
-			e1.printStackTrace();
-		} finally{
 			try {
 				pstmt.close();
 				stmt.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
+			e1.printStackTrace();
+			return false;
 		}
 		
 		// 逐条添加文件编码映射
@@ -143,16 +203,44 @@ public class TaskManager {
 		
 		Node delivlst = delivlsts.item(0);
 		Node itr = delivlst.getFirstChild();
-		while (true)
-		{
-			itr.
-		}
-		
+		String ddnfilen = null;
+		String dmcoricn = null;
+
 		try {
-			dbCon.closeCon(con);
-		} catch (Exception e) {
+			pstmt = con.prepareStatement("insert into t_filecodemap "
+					+ "values(null,?,?);");
+			while (itr != null){
+				if (itr.getNodeType() != Node.TEXT_NODE){
+					
+					String nodeName = itr.getNodeName();
+					
+					switch (nodeName) {
+					case "dmcoricn":
+						dmcoricn = itr.getTextContent();
+						insertCodeFilePair(pstmt, dmcoricn, ddnfilen);
+						break;
+					case "ddnfilen":
+						ddnfilen = itr.getTextContent();
+						break;
+					default:
+						break;
+					}
+				}
+					
+				itr = itr.getNextSibling();
+			}
+			pstmt.close();
+			
+		} catch (SQLException e) {
+			try {
+				pstmt.close();
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
 			e.printStackTrace();
 		}
+		
+
 		
 		return true;
 	}

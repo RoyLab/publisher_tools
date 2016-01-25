@@ -32,7 +32,6 @@ public class DbUtil {
 	}
 	
 	
-	
 	public static void test(String[] args) {
 		DbUtil userdbUtil=new DbUtil();
 		Connection con = null;
