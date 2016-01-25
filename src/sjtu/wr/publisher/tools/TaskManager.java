@@ -23,13 +23,13 @@ import sjtu.wr.utils.OperateXMLByDOM;
 
 public class TaskManager {
 	
+	public static String[] SEARCH_CLASS = {"pnr", "nsn", "para",
+			"figure", "table", "step", "warning", "caution"};
+	
 	private static final String pmcReg = "PMC-.*\\.xml";
 	private static final String ddnReg = "DDN-.*\\.xml";
 	private static final String ddnTableName = "t_ddn";
-	
-	
-	private static final String sqlDropTableTemplate = "DROP TABLE IF EXISTS t_?;";
-	
+
 	private DbUtil dbCon = null;
 	private String dbName = null;
 	private String srcDir = null;

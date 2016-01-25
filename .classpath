@@ -8,5 +8,6 @@
 	<classpathentry kind="lib" path="lib/jcgm-image-0.1.1.jar"/>
 	<classpathentry kind="lib" path="lib/thumbnailator-0.4.8.jar"/>
 	<classpathentry kind="lib" path="lib/xmlgraphics-commons-1.5.jar"/>
+	<classpathentry kind="lib" path="lib/json-20140107.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
