@@ -25,7 +25,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import sjtu.wr.utils.AsciiSaveUtil;
-import sjtu.wr.utils.DBWriter;
 import sjtu.wr.utils.OperateXMLByDOM;
 
 
@@ -153,7 +152,7 @@ public class PMParser {
 	
 	protected boolean updateContent(List<File> fileList) throws SQLException, SAXException, IOException, ParserConfigurationException {
 		
-		DBWriter dbWriter = new DBWriter();
+		DmDbWriter dbWriter = new DmDbWriter();
 		
 		dbWriter.initTables();
 		for (File file: fileList){

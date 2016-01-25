@@ -1,4 +1,4 @@
-package sjtu.wr.utils;
+package sjtu.wr.publisher.tools;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,11 +12,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
-import sjtu.wr.publisher.tools.DMParser;
-import sjtu.wr.publisher.tools.DmDbDoc;
-import sjtu.wr.publisher.tools.TaskManager;
-
-public class DBWriter {
+public class DmDbWriter {
 	
 	private Connection con = null;
 	
@@ -55,7 +51,7 @@ public class DBWriter {
 	private static String sqlInsertTemplate="insert into t_? values(null,?,?);";
 	private static String sqlQueryDMId="select Id from t_main where dmc=?;";
 	
-	public DBWriter(Connection connection){
+	public DmDbWriter(Connection connection){
 		con = connection;
 	}
 
