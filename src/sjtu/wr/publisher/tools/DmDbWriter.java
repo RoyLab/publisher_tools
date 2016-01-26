@@ -1,6 +1,5 @@
 package sjtu.wr.publisher.tools;
 
-import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -16,13 +15,13 @@ public class DmDbWriter {
 	
 	private Connection con = null;
 	
-	private static String sqlCreateTableMain = "CREATE TABLE `t_main` ("+
+	private static String sqlCreateTableMain = "CREATE TABLE `t_dmcmain` ("+
 			  "`id` int(11) NOT NULL AUTO_INCREMENT,"+
 			  "`dmc` varchar(128) DEFAULT NULL,"+
 			  "`name` varchar(128) DEFAULT NULL," + 
 			  "`modified` datetime NOT NULL DEFAULT '2000-01-01 11:11:11',"+
 			  "`content` text,"+
-			  "`html` text,"+
+			  "`html` varchar(128),"+
 			  "`security` int(11) DEFAULT NULL,"+
 			  "`language` varchar(10) DEFAULT NULL,"+
 			  "`associateFile` varchar(256) NOT NULL,"+
@@ -32,7 +31,7 @@ public class DmDbWriter {
 			") ENGINE=InnoDB DEFAULT CHARSET=utf8;";
 
 	
-	private static String sqlCreateTableContentTemplate = "CREATE TABLE `db_pm`.`t_?` ("+
+	private static String sqlCreateTableContentTemplate = "CREATE TABLE `t_search_?` ("+
 			  "`id` INT NOT NULL AUTO_INCREMENT,"+
 			  "`content` TEXT NULL,"+
 			  "`dmId` INT NOT NULL,"+
@@ -41,15 +40,15 @@ public class DmDbWriter {
 			  "INDEX `fk_idx` (`dmId` ASC),"+
 			  "CONSTRAINT `fk_?` "+
 			    "FOREIGN KEY (`dmId`) "+
-			    "REFERENCES `db_pm`.`t_main` (`id`) "+
+			    "REFERENCES `t_dmcmain` (`id`) "+
 			    "ON DELETE NO ACTION "+
 			    "ON UPDATE NO ACTION);";
 	
-	private static String sqlDropTableTemplate = "DROP TABLE IF EXISTS t_?;";
+	private static String sqlDropTableTemplate = "DROP TABLE IF EXISTS t_search_?;";
 
-	private static String sqlInsertMain="insert into t_main values(null,?,?,?,?,?,?,?,?);";
-	private static String sqlInsertTemplate="insert into t_? values(null,?,?);";
-	private static String sqlQueryDMId="select Id from t_main where dmc=?;";
+	private static String sqlInsertMain="insert into t_dmcmain values(null,?,?,?,?,?,?,?,?);";
+	private static String sqlInsertTemplate="insert into t_search_? values(null,?,?);";
+	private static String sqlQueryDMId="select Id from t_dmcmain where dmc=?;";
 	
 	public DmDbWriter(Connection connection){
 		con = connection;
@@ -61,7 +60,7 @@ public class DmDbWriter {
 		for (int i = 0; i < TaskManager.SEARCH_CLASS.length; i++){
 			pstmt.executeUpdate(sqlDropTableTemplate.replace("?", TaskManager.SEARCH_CLASS[i]));
 		}
-		pstmt.executeUpdate(sqlDropTableTemplate.replace("?", "main"));
+		pstmt.executeUpdate("DROP TABLE IF EXISTS t_dmcmain;");
 		
 		pstmt.executeUpdate(sqlCreateTableMain);
 		for (int i = 0; i < TaskManager.SEARCH_CLASS.length; i++){
@@ -78,14 +77,11 @@ public class DmDbWriter {
 		return -1;
 	}
 	
-	public boolean addDM(File file) throws SQLException, SAXException, IOException, ParserConfigurationException{
+	public boolean addDM(DmDbDoc dmDoc) throws SQLException, SAXException, IOException, ParserConfigurationException{
 		
 		if (con == null){
 			System.err.println("Disconnect from JDBC.");
 		}
-		
-		DMParser dmParser = new DMParser(file.getAbsolutePath());
-		DmDbDoc dmDoc = dmParser.parse();
 		
 		try {
 			con.setAutoCommit(false);
@@ -120,9 +116,5 @@ public class DmDbWriter {
 			con.commit();
 		}
 		return true;
-	}
-	
-	public void destroy() throws SQLException{
-		if (con != null) con.close();
 	}
 }

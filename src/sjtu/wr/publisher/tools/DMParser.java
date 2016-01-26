@@ -15,19 +15,21 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import sjtu.wr.utils.OperateXMLByDOM;
-
 
 public class DMParser {
 	
 	private File file = null;
 	
-	public DMParser(String path) {
-		file = new File(path);
+	public DMParser(File f) {
+		file = f;
 		if (!file.exists() || file.isDirectory()){
-			System.err.println(path+" is not a valid file");
+			System.err.println(f.getAbsolutePath() +" is not a valid file");
 			file = null;
 		}
+	}
+	
+	public String getHtmlFileName() {
+		return file.getName().replaceAll("\\.xml", ".html");
 	}
 
 	public DmDbDoc parse() throws SAXException, IOException, ParserConfigurationException{
@@ -39,7 +41,7 @@ public class DMParser {
 		doc = builder.parse(file);
 
 		DmDbDoc dmDoc = new DmDbDoc();
-		dmDoc.setDmc(file.getName().substring(4,32).replaceAll("-", ""));
+		dmDoc.setDmc(file.getName().substring(4,32));
 		dmDoc.setName(doc.getElementsByTagName("techname").item(0).getTextContent()+" - "+
 				doc.getElementsByTagName("infoname").item(0).getTextContent());
 		
@@ -48,7 +50,7 @@ public class DMParser {
 		Node content = doc.getElementsByTagName("content").item(0);
 		dmDoc.setContent(getTextContent(content));
 		
-		String html = OperateXMLByDOM.doc2String(doc);
+		String html = getHtmlFileName();
 		dmDoc.setHtml(html);
 		
 		dmDoc.setSecurity(1);
@@ -76,6 +78,7 @@ public class DMParser {
 	}
 	
 	public String getTextContent(Node node){
+		if (node == null) return "";
 		return node.getTextContent().trim().replaceAll("\\s\\s*", " ");
 	}
 }

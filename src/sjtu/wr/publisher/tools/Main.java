@@ -47,10 +47,9 @@ public class Main {
 			return;
 		}
 		
-		System.out.println(inputDirName);
-		System.out.println(outputDirName);
-		System.out.println(projectName);
-		GenThumbnails.main1(null);
+		System.out.println("源文件目录: " + inputDirName);
+		System.out.println("输出目录: " + outputDirName);
+		System.out.println("项目名称: " + projectName);
 		
 		TaskManager tm = new TaskManager();
 		try {

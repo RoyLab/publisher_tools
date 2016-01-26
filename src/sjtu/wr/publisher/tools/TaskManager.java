@@ -1,6 +1,8 @@
 package sjtu.wr.publisher.tools;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,6 +15,8 @@ import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.xml.transform.Transformer;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -20,6 +24,7 @@ import org.w3c.dom.NodeList;
 import sjtu.wr.utils.DbUtil;
 import sjtu.wr.utils.FileNameOp;
 import sjtu.wr.utils.OperateXMLByDOM;
+import sjtu.wr.utils.XSLTTransformer;
 
 public class TaskManager {
 	
@@ -132,21 +137,6 @@ public class TaskManager {
 					+ "PRIMARY KEY (`id`), UNIQUE INDEX "
 					+ "`idnew_table_UNIQUE` (`id` ASC));");
 			
-			stmt.executeUpdate("CREATE TABLE `t_dmrecord` ("+
-				  "`id` int(11) NOT NULL AUTO_INCREMENT,"+
-				  "`dmc` varchar(128) DEFAULT NULL,"+
-				  "`name` varchar(128) DEFAULT NULL," + 
-				  "`modified` datetime DEFAULT NULL,"+
-				  "`content` text,"+
-				  "`html` text,"+
-				  "`security` int(11) DEFAULT NULL,"+
-				  "`language` varchar(10) DEFAULT NULL,"+
-				  "`associateFile` varchar(256) NOT NULL,"+
-				  "PRIMARY KEY (`id`),"+
-				  "UNIQUE KEY `id_UNIQUE` (`id`),"+
-				  "UNIQUE KEY `dmc_UNIQUE` (`dmc`)"+
-				  ") ENGINE=InnoDB DEFAULT CHARSET=utf8;");
-			
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 			try {
@@ -234,9 +224,24 @@ public class TaskManager {
 		 
 		System.out.println("添加全文索引...");
 		Statement stmt = con.createStatement();
-		stmt.close();
+		File[] dms = getFileList(stmt, "DMC");
+		if (dms == null || dms.length < 1)
+			throw new Exception("DMC not found.");
 		
-	
+		DmDbWriter dbWriter = new DmDbWriter(con);
+		dbWriter.initTables();
+		this.getClass().getResource("/sjtu/wr/publisher/xslts/dm.xslt");
+		Transformer xformer = XSLTTransformer.createTransformerWithPath(new File(this.getClass().
+				getResource("/sjtu/wr/publisher/xslts/dm.xslt").getFile()));
+		
+		for (File file: dms){
+			DMParser dmParser = new DMParser(file);
+			DmDbDoc dmDoc = dmParser.parse();
+			dbWriter.addDM(dmDoc);
+			File out = new File(outDir + dmDoc.getHtml());
+			FileWriter writer = new FileWriter(out);
+			XSLTTransformer.xsl2StreamWithPath(new FileInputStream(file), writer, xformer);
+		}
 		return true;
 	}
 	
