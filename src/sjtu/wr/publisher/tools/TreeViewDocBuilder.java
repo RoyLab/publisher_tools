@@ -61,7 +61,9 @@ public class TreeViewDocBuilder {
 			Node item = nodes.item(i);
 			String name = item.getNodeName();
 			if (name == "dmc"){
-				return item.getTextContent().trim().replaceAll("\\s\\s*", "");
+				String [] raw = item.getTextContent().trim().split("\\s\\s*");
+				return raw[0] + '-' + raw[1] + '-' + raw[2] + '-' + raw[3] + raw[4] + '-' + raw[5]
+								+ '-' + raw[6] + raw[7] + '-' + raw[8] + raw[9]	+ '-' + raw[10];
 			}
 		}
 		return null;

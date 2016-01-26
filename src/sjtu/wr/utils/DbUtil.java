@@ -16,11 +16,13 @@ public class DbUtil {
 	}
 	
 	public Connection getCon() throws Exception{
-		Class.forName(PropertiesUtil.getValue("jdbcName"));
+		
+		PropertiesUtil prop = PropertiesUtil.getInstance();
+		Class.forName(prop.getValue("jdbcName"));
 		Connection con=DriverManager.getConnection(
-				PropertiesUtil.getValue("UserDbUrl"), 
-				PropertiesUtil.getValue("dbUserName"), 
-				PropertiesUtil.getValue("dbPassword"));
+				prop.getValue("UserDbUrl"), 
+				prop.getValue("dbUserName"), 
+				prop.getValue("dbPassword"));
 		
 		return con;
 	}

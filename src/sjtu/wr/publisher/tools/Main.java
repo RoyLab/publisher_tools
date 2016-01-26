@@ -53,6 +53,10 @@ public class Main {
 		GenThumbnails.main1(null);
 		
 		TaskManager tm = new TaskManager();
-		tm.operateTask(inputDirName, outputDirName, projectName);
+		try {
+			tm.operateTask(inputDirName, outputDirName, projectName);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }
