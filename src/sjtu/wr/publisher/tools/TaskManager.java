@@ -28,8 +28,14 @@ import sjtu.wr.utils.XSLTTransformer;
 
 public class TaskManager {
 	
-	public static String[] SEARCH_CLASS = {"pnr", "nsn", "para",
+	public final static String[] SEARCH_CLASS = {"pnr", "nsn", "para",
 			"figure", "table", "step", "warning", "caution"};
+	
+	public final static String PIC_FORMAT =
+			"jpg|jpeg|bmp|ico|gif|tif|tiff|png|"
+			+"cgm|iso|CATDrawing|CATDrawing|CATPart|CATProduct|"
+			+"ipt|iam|par|cfg|SLDPRT|SLDDRW|SLDASM|prt|"
+			+"dwg|dgn|dst|asm|pcb|emf|wmf|ddb|sch|PDF|vsd";
 	
 	private String projName = null;
 	
@@ -45,14 +51,22 @@ public class TaskManager {
 	public void operateTask(String input, String output, String name) throws Exception{
 		
 		boolean result = false;
-		
+		srcDir = FileNameOp.makeDirName(input);
+		dbName = "db_" + name;
+		outDir = FileNameOp.makeDirName(output);;
+		projName = name;
 		dbCon = new DbUtil();
+		
 		Connection con = null;
 		try {
 			con = dbCon.getCon();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		Statement stmt = con.createStatement();
+		stmt.executeUpdate("USE db_test;");
+		stmt.close();
 		
 		result = addDDNFileMap(con, input, output, name);
 		if (!result)
@@ -95,11 +109,6 @@ public class TaskManager {
 		}
 		
 		System.out.println("找到DDN目录： " + ddns[0].getName());
-		
-		srcDir = FileNameOp.makeDirName(input);
-		dbName = "db_" + name;
-		outDir = FileNameOp.makeDirName(output);;
-		projName = name;
 		File ddn = ddns[0];
 		
 		long time = ddn.lastModified();
@@ -222,15 +231,15 @@ public class TaskManager {
 	
 	private boolean processDMCs(Connection con) throws Exception{
 		 
-		System.out.println("添加全文索引...");
 		Statement stmt = con.createStatement();
 		File[] dms = getFileList(stmt, "DMC");
 		if (dms == null || dms.length < 1)
 			throw new Exception("DMC not found.");
+		stmt.close();
 		
+		System.out.println("添加全文索引，生成html，共个"+ dms.length +"文件！");
 		DmDbWriter dbWriter = new DmDbWriter(con);
 		dbWriter.initTables();
-		this.getClass().getResource("/sjtu/wr/publisher/xslts/dm.xslt");
 		Transformer xformer = XSLTTransformer.createTransformerWithPath(new File(this.getClass().
 				getResource("/sjtu/wr/publisher/xslts/dm.xslt").getFile()));
 		
@@ -247,7 +256,24 @@ public class TaskManager {
 	
 	private boolean processICNs(Connection con) throws Exception{
 		
-	
+		Statement stmt = con.createStatement();
+		File[] icns = getFileList(stmt, "ICN");
+		if (icns == null || icns.length < 1)
+			throw new Exception("ICN not found.");
+		stmt.close();
+		
+		File[] pics = findMatchedFile(icns, "ICN-.*\\.("+GenThumbnails.READABLE_FORMAT+")", false);
+		
+		File file = new File(outDir + "thumb/"); 
+		if(file!=null&&!file.exists()){ 
+			file.mkdirs(); 
+		} 
+		
+		GenThumbnails.genThumbnails(pics, file);
+		for (File pic: pics){
+			System.out.println(pic.getName());
+		}
+		
 		return true;
 	}
 	
@@ -259,28 +285,24 @@ public class TaskManager {
 		pstmt.executeUpdate();
 	}
 	
-	private File[] findMatchedFile(File[] files, String regexp, boolean isSingle)
-	{
-		Pattern pattern = Pattern.compile(regexp);
+	private File[] findMatchedFile(File[] files, String regexp, boolean isSingle) {
+		Pattern pattern = Pattern.compile(regexp, Pattern.CASE_INSENSITIVE);
 		
 		ArrayList<File> matchedFiles = new ArrayList<File>();
-		File []result = null;
 		for (File file: files){
 			Matcher m = pattern.matcher(file.getName());
 			if (m.matches()){
 				matchedFiles.add(file);
-				if (isSingle)
-				{
-					result = matchedFiles.toArray(new File[1]);
-					return result;
+				if (isSingle) {
+					return matchedFiles.toArray(new File[1]);
 				}
 			}
 		}
-		return result;
+		return matchedFiles.toArray(new File[matchedFiles.size()]);
 	}
 	
-	private File[] findMatchedFile(String path, String regexp, boolean isSingle)
-	{
+	private File[] findMatchedFile(String path, String regexp, boolean isSingle) {
+		
 		File dir = new File(path);
 		if (!dir.exists() || !dir.isDirectory())
 		{

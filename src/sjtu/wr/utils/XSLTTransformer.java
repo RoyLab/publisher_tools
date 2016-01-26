@@ -10,7 +10,6 @@ import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.stream.Stream;
 
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;

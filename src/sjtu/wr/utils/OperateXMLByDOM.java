@@ -30,6 +30,7 @@ import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
  * @author Watson Xu
  * @date 2011-5-3 上午09:49:27
  */
+@SuppressWarnings("restriction")
 public class OperateXMLByDOM {
 	/**
 	 * 将给定文件的内容或者给定 URI 的内容解析为一个 XML 文档，并且返回一个新的 DOM Document 对象
