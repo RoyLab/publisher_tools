@@ -22,6 +22,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import sjtu.wr.utils.DbUtil;
+import sjtu.wr.utils.FileCopy;
 import sjtu.wr.utils.FileNameOp;
 import sjtu.wr.utils.OperateXMLByDOM;
 import sjtu.wr.utils.XSLTTransformer;
@@ -53,8 +54,8 @@ public class TaskManager {
 		boolean result = false;
 		srcDir = FileNameOp.makeDirName(input);
 		dbName = "db_" + name;
-		outDir = FileNameOp.makeDirName(output);;
 		projName = name;
+		outDir = FileNameOp.makeDirName(output)+projName+'/';
 		dbCon = new DbUtil();
 		
 		Connection con = null;
@@ -64,9 +65,13 @@ public class TaskManager {
 			e.printStackTrace();
 		}
 		
-		Statement stmt = con.createStatement();
-		stmt.executeUpdate("USE db_test;");
-		stmt.close();
+//		Statement stmt = con.createStatement();
+//		stmt.executeUpdate("USE db_test;");
+//		stmt.close();
+		
+		result = makeDirs();
+		if (!result)
+			throw new Exception();
 		
 		result = addDDNFileMap(con, input, output, name);
 		if (!result)
@@ -85,6 +90,19 @@ public class TaskManager {
 			throw new Exception();
 		
 		System.out.println("发布完成！");
+	}
+	
+	private boolean makeDirs(){
+		File dir = new File(outDir);
+		if (dir.exists() && !dir.isDirectory()){
+			System.err.println(outDir + "已经存在但不是一个文件夹");
+			return false;
+		}
+		
+		if (!dir.exists())
+			return dir.mkdirs();
+		
+		return true;
 	}
 	
 	private File[] getFileList(Statement stmt, String type) throws SQLException	{
@@ -237,7 +255,7 @@ public class TaskManager {
 			throw new Exception("DMC not found.");
 		stmt.close();
 		
-		System.out.println("添加全文索引，生成html，共个"+ dms.length +"文件！");
+		System.out.println("正在添加全文索引，生成html，共个"+ dms.length +"文件！");
 		DmDbWriter dbWriter = new DmDbWriter(con);
 		dbWriter.initTables();
 		Transformer xformer = XSLTTransformer.createTransformerWithPath(new File(this.getClass().
@@ -263,17 +281,11 @@ public class TaskManager {
 		stmt.close();
 		
 		File[] pics = findMatchedFile(icns, "ICN-.*\\.("+GenThumbnails.READABLE_FORMAT+")", false);
+		System.out.println("正在生成缩略图，共"+pics.length+"个文件！");
+		GenThumbnails.genThumbnails(pics, new File(outDir));
 		
-		File file = new File(outDir + "thumb/"); 
-		if(file!=null&&!file.exists()){ 
-			file.mkdirs(); 
-		} 
-		
-		GenThumbnails.genThumbnails(pics, file);
-		for (File pic: pics){
-			System.out.println(pic.getName());
-		}
-		
+		pics = findMatchedFile(icns, "ICN-.*\\.("+PIC_FORMAT+")", false);
+		FileCopy.copyFiles(pics, outDir);
 		return true;
 	}
 	

@@ -10,7 +10,7 @@ class MinRename extends Rename{
 
 	public String apply(String name, ThumbnailParameter arg1) {
 		int ptr = name.lastIndexOf('.');
-		return "min." + name.substring(0, ptr+1) + "GIF";
+		return "min_" + name.substring(0, ptr+1) + "GIF";
 	}
 	
 }
@@ -25,7 +25,7 @@ public class GenThumbnails {
     public static void converter(String sourcePath, String destPath, String format) throws IOException{
     	//形成固定大小的缩略图
     	Thumbnails.of(sourcePath)   
-        .size(width,height)   
+        .size(width,height)
         .keepAspectRatio(false)   
         .toFile(destPath);
     }

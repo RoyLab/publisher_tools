@@ -59,7 +59,7 @@ public class PMParser {
 	protected void SaveDirectory(Document doc) throws TransformerException, ParserConfigurationException {
 		
 		String xmlStr = OperateXMLByDOM.doc2FormatString(doc);
-		AsciiSaveUtil.saveAscii(outDir+projName+"_tree.xml", xmlStr);
+		AsciiSaveUtil.saveAscii(outDir+"tree.xml", xmlStr);
 
 		// hack的方法, 给每个目录加一个空节点
 		List<Node> nl2 = new ArrayList<Node>();
@@ -80,6 +80,6 @@ public class PMParser {
 		// 通过字符替换把这些空节点去掉，以达到产生[]括号对的目的
 		String tmp = jsonString.replaceAll(",\\\"\\\"", "");
 		String json = "["+tmp.substring(8, tmp.length()-1)+"]";
-		AsciiSaveUtil.saveAscii(outDir+projName+"_tree.json", json);
+		AsciiSaveUtil.saveAscii(outDir+"tree.json", json);
 	}
 }
