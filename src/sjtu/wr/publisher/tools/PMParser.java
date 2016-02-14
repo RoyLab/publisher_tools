@@ -18,16 +18,15 @@ import org.w3c.dom.NodeList;
 
 import sjtu.wr.utils.AsciiSaveUtil;
 import sjtu.wr.utils.OperateXMLByDOM;
+import sjtu.wr.utils.PropertiesUtil;
 
 public class PMParser {
 	
-	private String projName = null;
 	private File[] pmFiles = null;
 	private String outDir = null;
 	
 	public PMParser(File [] pms, String pjName, String odir) {
 		pmFiles = pms;
-		projName = pjName;
 		outDir = odir;
 	}
 	
@@ -39,7 +38,7 @@ public class PMParser {
 		Document xmlDir = builder.newDocument();
 		Element root = xmlDir.createElement("root");
 		xmlDir.appendChild(root);
-		root.setAttribute("text", projName);
+		root.setAttribute("text", PropertiesUtil.getInstance().getValue("projectName"));
 		TreeViewDocBuilder dirBuilder = new TreeViewDocBuilder(xmlDir, root);
 
 		for (File pmcFile: pmFiles){

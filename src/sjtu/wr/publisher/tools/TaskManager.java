@@ -25,6 +25,7 @@ import sjtu.wr.utils.DbUtil;
 import sjtu.wr.utils.FileCopy;
 import sjtu.wr.utils.FileNameOp;
 import sjtu.wr.utils.OperateXMLByDOM;
+import sjtu.wr.utils.PropertiesUtil;
 import sjtu.wr.utils.XSLTTransformer;
 
 public class TaskManager {
@@ -48,8 +49,9 @@ public class TaskManager {
 	private DbUtil dbCon = null;
 	private String srcDir = null;
 	private String outDir = null;
+	private String resDir = null;
 	
-	public void operateTask(String input, String output, String name) throws Exception{
+	public void operateTask(String input, String output, String name, String rDir) throws Exception{
 		
 		boolean result = false;
 		srcDir = FileNameOp.makeDirName(input);
@@ -57,6 +59,9 @@ public class TaskManager {
 		projName = name;
 		outDir = FileNameOp.makeDirName(output)+projName+'/';
 		dbCon = new DbUtil();
+		resDir = FileNameOp.makeDirName(rDir);
+		
+		PropertiesUtil.CreateInstance(resDir+"config.properties");
 		
 		Connection con = null;
 		try {
@@ -258,8 +263,9 @@ public class TaskManager {
 		System.out.println("正在添加全文索引，生成html，共个"+ dms.length +"文件！");
 		DmDbWriter dbWriter = new DmDbWriter(con);
 		dbWriter.initTables();
-		Transformer xformer = XSLTTransformer.createTransformerWithPath(new File(this.getClass().
-				getResource("/sjtu/wr/publisher/xslts/dm.xslt").getFile()));
+		Transformer xformer = null;
+		
+		xformer = XSLTTransformer.createTransformerWithPath(new File(resDir+"xslts/dm.xslt"));
 		
 		for (File file: dms){
 			DMParser dmParser = new DMParser(file);
