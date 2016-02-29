@@ -2,11 +2,12 @@ package sjtu.wr.publisher.tools;
 
 public class Main {
 	
-	public static final String DEFAULT_OUTPUTDIR = "/release";
+	public static final String DEFAULT_OUTPUTDIR = "./build";
 	
 	public static String inputDirName = null;
 	public static String outputDirName = null;
 	public static String projectName = null;
+	public static String resDirName = null;
 
 	public static void main(String[] args) {
 		
@@ -23,7 +24,10 @@ public class Main {
 				break;
 			case "-n":
 				projectName = args[++ptr];
-				break;		
+				break;
+			case "-r":
+				resDirName = args[++ptr];
+				break;	
 			default:
 				System.err.println("unexpected parameter: " + args[ptr]);
 				return;
@@ -38,7 +42,7 @@ public class Main {
 		
 		if (outputDirName == null)
 		{
-			outputDirName = inputDirName + DEFAULT_OUTPUTDIR;
+			outputDirName = DEFAULT_OUTPUTDIR;
 		}
 		
 		if (projectName == null)
@@ -47,13 +51,18 @@ public class Main {
 			return;
 		}
 		
+		if (resDirName == null)
+		{
+			resDirName = "./resources";
+		}
+		
 		System.out.println("源文件目录: " + inputDirName);
 		System.out.println("输出目录: " + outputDirName);
 		System.out.println("项目名称: " + projectName);
 		
 		TaskManager tm = new TaskManager();
 		try {
-			tm.operateTask(inputDirName, outputDirName, projectName);
+			tm.operateTask(inputDirName, outputDirName, projectName, resDirName);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
