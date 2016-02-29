@@ -11,6 +11,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.Templates;
@@ -159,6 +160,9 @@ public class XSLTTransformer {
 		
         Source source = new StreamSource(input);
         Result result = new StreamResult(writer);
+//        properties.setProperty(OutputKeys.INDENT, "yes");
+//        properties.setProperty(OutputKeys.ENCODING, "UTF-8");
+        xformer.getOutputProperties().setProperty(OutputKeys.ENCODING, "UTF-8");
         xformer.transform(source, result);
 	}
 	
@@ -183,9 +187,9 @@ public class XSLTTransformer {
         return template.newTransformer();
 	}
 	
-	public static void main(String[] args) {
-		xsl("D:\\pubRes\\xml\\DMC-SAMPLE-A-72-00-00-00A-110B-A_000-03_zh-CN.xml",
-				"C:/Users/RUI/Desktop/xlst/output.html",
-				"D:\\Codes\\eclipse\\Publisher\\\\xsl\\bridge\\toolkit\\commands\\dmStylesheet.mobile.xsl");
-	}
+//	public static void main(String[] args) {
+//		xsl("D:\\pubRes\\xml\\DMC-SAMPLE-A-72-00-00-00A-110B-A_000-03_zh-CN.xml",
+//				"C:/Users/RUI/Desktop/xlst/output.html",
+//				"D:\\Codes\\eclipse\\Publisher\\\\xsl\\bridge\\toolkit\\commands\\dmStylesheet.mobile.xsl");
+//	}
 }
