@@ -53,7 +53,7 @@ public class Main {
 		
 		if (resDirName == null)
 		{
-			resDirName = "./resources";
+			resDirName = "./resources/";
 		}
 		
 		System.out.println("源文件目录: " + inputDirName);

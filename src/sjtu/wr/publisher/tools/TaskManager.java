@@ -266,6 +266,7 @@ public class TaskManager {
 		dbWriter.initTables();
 		Transformer xformer = null;
 		
+		System.out.println("使用模板： "+resDir+"xslts/dm.xslt");
 		xformer = XSLTTransformer.createTransformerWithPath(new File(resDir+"xslts/dm.xslt"));
 		
 		for (File file: dms){
