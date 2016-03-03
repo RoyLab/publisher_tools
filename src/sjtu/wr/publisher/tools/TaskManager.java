@@ -2,7 +2,8 @@ package sjtu.wr.publisher.tools;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -271,8 +272,11 @@ public class TaskManager {
 			DMParser dmParser = new DMParser(file);
 			DmDbDoc dmDoc = dmParser.parse();
 			dbWriter.addDM(dmDoc);
-			File out = new File(outDir + dmDoc.getHtml());
-			FileWriter writer = new FileWriter(out);
+			
+			FileOutputStream fos = new FileOutputStream(outDir + dmDoc.getFulldmc()+".htm");
+			OutputStreamWriter writer = new OutputStreamWriter(fos, "UTF-8");
+//			File out = new File(outDir + dmDoc.getHtml());
+//			FileWriter writer = new FileWriter(out);
 			XSLTTransformer.xsl2StreamWithPath(new FileInputStream(file), writer, xformer);
 		}
 		return true;

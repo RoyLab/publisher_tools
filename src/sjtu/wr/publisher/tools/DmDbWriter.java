@@ -21,7 +21,7 @@ public class DmDbWriter {
 			  "`name` varchar(128) DEFAULT NULL," + 
 			  "`modified` datetime NOT NULL DEFAULT '2000-01-01 11:11:11',"+
 			  "`content` text,"+
-			  "`html` varchar(128),"+
+			  "`fulldmc` varchar(128),"+
 			  "`security` int(11) DEFAULT NULL,"+
 			  "`language` varchar(10) DEFAULT NULL,"+
 			  "`associateFile` varchar(256) NOT NULL,"+
@@ -90,7 +90,7 @@ public class DmDbWriter {
 			pstmt.setString(2, dmDoc.getName());
 			pstmt.setString(3, dmDoc.getModified());
 			pstmt.setString(4, dmDoc.getContent());
-			pstmt.setString(5, dmDoc.getHtml());
+			pstmt.setString(5, dmDoc.getFulldmc());
 			pstmt.setInt(6, dmDoc.getSecurity());
 			pstmt.setString(7, dmDoc.getLanguage());
 			pstmt.setString(8, dmDoc.getAssociateFile());

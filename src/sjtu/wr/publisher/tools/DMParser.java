@@ -28,8 +28,8 @@ public class DMParser {
 		}
 	}
 	
-	public String getHtmlFileName() {
-		return file.getName().replaceAll("\\.xml", ".html");
+	public String getFullDmc() {
+		return file.getName().replaceAll("\\.xml", "");
 	}
 
 	public DmDbDoc parse() throws SAXException, IOException, ParserConfigurationException{
@@ -50,8 +50,8 @@ public class DMParser {
 		Node content = doc.getElementsByTagName("content").item(0);
 		dmDoc.setContent(getTextContent(content));
 		
-		String html = getHtmlFileName();
-		dmDoc.setHtml(html);
+		String fulldmc = getFullDmc();
+		dmDoc.setFulldmc(fulldmc);
 		
 		dmDoc.setSecurity(1);
 		dmDoc.setLanguage("zh_CN");

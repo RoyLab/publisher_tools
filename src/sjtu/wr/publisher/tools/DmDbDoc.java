@@ -10,7 +10,7 @@ public class DmDbDoc {
 	private int security;
 	private String language;
 	private String associateFile;
-	private String html;
+	private String fulldmc;
 	
 	public String getName() {
 		return name;
@@ -20,12 +20,12 @@ public class DmDbDoc {
 		this.name = name;
 	}
 
-	public String getHtml() {
-		return html;
+	public String getFulldmc() {
+		return fulldmc;
 	}
 
-	public void setHtml(String str) {
-		this.html = str;
+	public void setFulldmc(String fulldmc) {
+		this.fulldmc = fulldmc;
 	}
 
 	public String getAssociateFile() {
